@@ -1,0 +1,46 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hotdog-classifier-v1
+  labels:
+    app: hotdog-classifier
+    experiment: hotdog-v1
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app: hotdog-classifier
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: training
+          image: chambie0102/hotdog-classifier:v1
+          resources:
+            requests:
+              nvidia.com/gpu: 1
+            limits:
+              nvidia.com/gpu: 1
+          env:
+            - name: WANDB_API_KEY
+              value: "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"
+            - name: WANDB_PROJECT
+              value: "chamber-hotdog"
+            - name: WANDB_RUN_NAME
+              value: "hotdog-v1-gpu"
+            - name: EPOCHS
+              value: "10"
+            - name: BATCH_SIZE
+              value: "64"
+            - name: LEARNING_RATE
+              value: "0.001"
+            - name: NUM_WORKERS
+              value: "2"
+          volumeMounts:
+            - name: dshm
+              mountPath: /dev/shm
+      volumes:
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: "2Gi"
