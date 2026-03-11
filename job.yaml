@@ -21,7 +21,7 @@ spec:
           sizeLimit: 2Gi
       containers:
       - name: train
-        image: chambiebot/hotdog-classifier:v1
+        image: chambie0102/hotdog-classifier:v1
         command: ["python", "-u", "train.py"]
         env:
         - name: LR
