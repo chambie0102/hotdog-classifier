@@ -1,0 +1,51 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hotdog-v1
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      tolerations:
+      - key: "nvidia.com/gpu"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+      nodeSelector:
+        nvidia.com/gpu.product: Tesla-T4
+      volumes:
+      - name: shm
+        emptyDir:
+          medium: Memory
+          sizeLimit: 2Gi
+      containers:
+      - name: train
+        image: chambiebot/hotdog-classifier:v1
+        command: ["python", "-u", "train.py"]
+        env:
+        - name: LR
+          value: "1e-4"
+        - name: BATCH_SIZE
+          value: "64"
+        - name: EPOCHS
+          value: "10"
+        - name: DROPOUT
+          value: "0.3"
+        - name: CLASS_WEIGHT
+          value: "3.0"
+        - name: NUM_WORKERS
+          value: "4"
+        - name: DATA_DIR
+          value: "/data"
+        - name: MODEL_SAVE_PATH
+          value: "/output/hotdog_model.pth"
+        resources:
+          requests:
+            memory: "4Gi"
+          limits:
+            memory: "8Gi"
+            nvidia.com/gpu: 1
+        volumeMounts:
+        - name: shm
+          mountPath: /dev/shm
